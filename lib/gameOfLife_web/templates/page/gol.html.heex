@@ -1,0 +1,42 @@
+<section>
+  <div>
+    Game Dimension: 
+    <br>
+    <br>
+    <input type="button" value="50 x 50" phx-click="dimension" phx-value-dimension="50"> <br>
+    <input type="button" value="20 x 20" phx-click="dimension" phx-value-dimension="20"> <br>
+    <input type="button" value="10 x 10" phx-click="dimension" phx-value-dimension="10"> <br>
+    <input type="button" value="05 x 05" phx-click="dimension" phx-value-dimension="5"> <br>
+  </div>
+  <div>
+    <%= @display %> <br>
+  </div>
+  
+  <input type="range" min="0" max="1" step="0.1">
+  <br>
+  <button phx-click="randomize">Randomize!</button>
+  <button phx-click="go">Go!</button>
+  <button phx-click="stop">Stop</button>
+</section>
+
+
+<section>
+
+  <div>
+    <div>
+      <%= for y <- 0..(Conway.Grid.size(@board) - 1) do %>
+        <div class="row"> 
+          <%= for  x <- 1..(Conway.Grid.size(@board)- 1) do %>
+            <div> 
+            <%= case Conway.Grid.cell_status(@board, x, y) do %>
+              <% 0 -> %> ☠️
+              <% 1 -> %> 😄
+            <% end%>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  </div>  
+ 
+</section>
