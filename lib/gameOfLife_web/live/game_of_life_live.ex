@@ -6,9 +6,11 @@ defmodule GameOfLifeWeb.GameOfLifeLive do
   alias Conway.Grid
   alias GameOfLifeWeb.PageView
 
+  @topic "GOL"
+
   def mount(_params, _session, socket) do
-    # connected?(socket) |> IO.inspect
-    # if connected?(socket), do: Process.send_after(self(), :update, 10000, true)
+    GameOfLifeWeb.Endpoint.subscribe(@topic)
+
     {
       :ok,
       assign(
@@ -17,21 +19,47 @@ defmodule GameOfLifeWeb.GameOfLifeLive do
         board: %Conway.Grid{data: {{1, 1}, {0, 0}}},
         size: 10,
         data: "{1,1,1,0}",
-        go: ""
+        go: "",
+        probability: "0.6",
+        steps: ""
       )
     }
   end
 
   def render(assigns), do: PageView.render("gol.html", assigns)
 
+  def handle_event("probability", %{"value" => p}, socket) do
+    {
+      :noreply,
+      assign(
+        socket,
+        probability: p
+      )
+    }
+  end
+
+  def handle_event("dimension", %{"dimension" => dimension}, socket) do
+    IO.inspect(dimension)
+    display = "Board size: #{dimension} x #{dimension}  "
+    {size, _} = Integer.parse(dimension)
+    board = Grid.new(size, socket.assigns.probability)
+    GameOfLifeWeb.Endpoint.broadcast_from(self(), @topic, "board_update", %{board: board, display: display,
+    size: size})
+    {
+      :noreply,
+      assign(
+        socket,
+        display: display,
+        size: size,
+        board: board
+      )
+    }
+  end
+
   def handle_event("randomize", _, socket) do
     display = "randomizing"
-    # |> IO.inspect
-    board = Grid.new(socket.assigns.size)
-
-
-    # data = board.data  |> Tuple.to_list |> Enum.map(fn x -> Tuple.to_list(x) end) |> Enum.map(fn x -> x |> Enum.join  end ) |> IO.inspect
-
+    board = Grid.new(socket.assigns.size, socket.assigns.probability)
+    GameOfLifeWeb.Endpoint.broadcast_from(self(), @topic, "board_update", %{display: display, board: board})
     {
       :noreply,
       assign(
@@ -43,60 +71,53 @@ defmodule GameOfLifeWeb.GameOfLifeLive do
     }
   end
 
-  def handle_event("dimension", %{"dimension" => dimension}, socket) do
-    IO.inspect(dimension)
-    display = "Board size: #{dimension} x #{dimension}  "
-    {size, _} = Integer.parse(dimension)
-    board = Grid.new(size)
-
-    {
-      :noreply,
-      assign(
-        socket,
-        display: display,
-        size: size,
-        board: board
-      )
-    }
-  end
-
   def handle_event("go", _, socket) do
-    size = socket.assigns.size
+    # size = socket.assigns.size
     Process.send_after(self(), :update, 1000)
     board = socket.assigns.board |> Grid.next()
-
+    GameOfLifeWeb.Endpoint.broadcast_from(self(), @topic, "board_update", %{board: board, display: "steps", steps: 0, go: :ok,})
     {
       :noreply,
       assign(
         socket,
-        size: size,
+        # size: size,
         board: board,
-        go: :ok
+        go: :ok,
+        steps: 0,
+        display: "steps"
       )
     }
   end
 
   def handle_event("stop", _, socket) do
+    GameOfLifeWeb.Endpoint.broadcast_from(self(), @topic, "board_update", %{go: "", board: socket.assigns.board})
     {
       :noreply,
       assign(
         socket,
         go: ""
-        )
+      )
     }
   end
 
+  def handle_info(%{topic: @topic, payload: payload}, socket) do
+    {:noreply, assign(socket, :board, payload.board)}
+  end
 
+  # * se encarga de mantener el ciclo constante actualizando cada 1000 ms
   def handle_info(:update, socket) do
-    board = socket.assigns.board
+    board_n = socket.assigns.board
+    board_y = board_n |> Grid.next()
+    steps = socket.assigns.steps + 1
 
     if socket.assigns.go == :ok do
-      IO.puts("repito")
+      IO.puts("iterando")
       Process.send_after(self(), :update, 1000)
-      {:noreply, assign(socket, board: board |> Grid.next())}
+      GameOfLifeWeb.Endpoint.broadcast_from(self(), @topic, "board_update", %{board: board_y, steps: steps})
+      {:noreply, assign(socket, board: board_y, steps: steps)}
     else
-      IO.puts("no iniciado")
-      {:noreply, assign(socket, board: board)}
+      IO.puts("Stop")
+      {:noreply, assign(socket, board: board_n)}
     end
   end
 end

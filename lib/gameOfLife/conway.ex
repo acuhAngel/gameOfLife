@@ -33,8 +33,28 @@ defmodule Conway.Grid do
     }
   end
 
+
   def new(data) when is_list(data) do
     %Conway.Grid{data: list_to_data(data)}
+  end
+
+  def probability(p) do
+
+    case p do
+      "0" -> [0]
+      "0.2" -> [1,0,0,0,0]
+      "0.4" -> [1,1,0,0,0]
+      "0.6" -> [1,1,1,0,0]
+      "0.8" -> [1,1,1,1,0]
+      "1" -> [1]
+
+    end
+  end
+  def new(size, p) when is_integer(size) and size > 0 do
+    seed = probability(p)
+    %Conway.Grid{
+      data: new_data(size, fn _, _ -> Enum.random(seed) end)
+    }
   end
 
   def size(%Conway.Grid{data: data}), do: tuple_size(data)
@@ -121,9 +141,3 @@ end
 
 
 :random.seed(:erlang.now)
-
-# for {name, {steps, data}} <- patterns do
-#   data
-#   |> Conway.Grid.new
-#   |> Conway.TerminalGame.play(name, steps)
-# end
