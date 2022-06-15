@@ -1,46 +1,76 @@
-<section>
-  <div>
-    Game Dimension:
-    <br>
-    <br>
-    <input type="button" value="50 x 50" phx-click="dimension" phx-value-dimension="50"> <br>
-    <input type="button" value="20 x 20" phx-click="dimension" phx-value-dimension="20"> <br>
-    <input type="button" value="10 x 10" phx-click="dimension" phx-value-dimension="10"> <br>
-    <input type="button" value="05 x 05" phx-click="dimension" phx-value-dimension="5"> <br>
-  </div>
-  <div>
-    <h3><%= @display %>  <%=@steps%> <br> </h3>
-  </div>
-  <br>
-  Probability <%= @probability %>
-  <br>
-  0 <input type="range" min="0" max="1" value="{@probability}"  phx-click="probability" step="0.2" > 1
+<section class="content">
+  <h1> Conway's Game Of Life </h1>
+  <h3>Game Dimension:</h3>
 
-  <br>
-  <br>
-  <button phx-click="randomize">Randomize!</button>
-  <button phx-click="go">Go!</button>
-  <button phx-click="stop">Stop</button>
-</section>
-
-
-<section>
-
-  <div>
-    <div>
-      <%= for y <- 0..(Conway.Grid.size(@board) - 1) do %>
-        <div class="row">
-          <%= for  x <- 1..(Conway.Grid.size(@board)- 1) do %>
-            <div>
-            <%= case Conway.Grid.cell_status(@board, x, y) do %>
-              <% 0 -> %> ☠️
-              <% 1 -> %> 😄
-            <% end%>
-            </div>
-          <% end %>
-        </div>
-      <% end %>
+  <div class="border dimension-menu">
+    <%= if @go == "go" do %> <div class="border p"> <b>disabled</b> </div> <% end %>
+    <div class="border p">
+     <input  type="radio" id="50" name="size"  phx-click="dimension" phx-value-dimension="50" checked={ if @size == 50 do "checked" end}   >
+      <label for="50">50 x 50</label>
+    </div>
+    <div class="border p">
+      <input type="radio" id="20" name="size" phx-click="dimension" phx-value-dimension="20" checked={ if @size == 20 do "checked" end} >
+      <label for="20">20 x 20</label>
+    </div>
+    <div class="border p">
+      <input type="radio" id="10" name="size" phx-click="dimension" phx-value-dimension="10" checked={ if @size == 10 do "checked" end} >
+      <label for="10">10 x 10</label>
+    </div>
+    <div class="border p">
+      <input type="radio" id="5" name="size" phx-click="dimension" phx-value-dimension="5" checked={ if @size == 5 do "checked" end} >
+      <label for="5">05 x 05</label>
     </div>
   </div>
+
+  <br>
+
+  <div>
+    <b>Probability <%= @probability %> </b>
+  </div>
+
+  <br>
+
+  0 <input class={if @go=="go" do "slider-off" else "slider" end} type="range" min="0" max="1" value={@probability}
+    phx-click="probability" step="0.2"> 1
+  <div>
+
+    <h3>
+      <%= @display %>
+      <%=@steps%> <br>
+    </h3>
+  </div>
+
+  <div class="dimension-menu border">
+    <div class="border">
+      <button class="button" phx-click="randomize">Randomize!</button>
+    </div>
+    <div class="border">
+      <button class="button" phx-click={if @go=="go" do "stop" else "go" end }>
+        <%= if @go=="go" do "Stop" else "GO!" end %>
+      </button>
+    </div>
+  </div>
+
+</section>
+
+<br>
+
+<section>
+
+    <div class="border">
+      <%= for y <- 0..(Conway.Grid.size(@board) - 1) do %>
+        <div class="row">
+          <%= for x <- 0..(Conway.Grid.size(@board)- 1) do %>
+            <div class="">
+              <%= case Conway.Grid.cell_status(@board, x, y) do %>
+                <% 0 -> %> <button class="no-live " phx-click="chg-status" phx-value-row={y} phx-value-col={x} value="0"> ☠️ </button>
+                <% 1 -> %> <button class="live " phx-click="chg-status" phx-value-row={y} phx-value-col={x} value="1"> 😁 </button>
+                <% "" -> %> -
+              <% end%>
+            </div>
+            <% end %>
+        </div>
+        <% end %>
+    </div>
 
 </section>
