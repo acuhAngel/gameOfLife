@@ -179,6 +179,11 @@ defmodule GameOfLifeWeb.GameOfLifeLive do
 
     board = Grid.change(g, r, c, v)
 
+    GameOfLifeWeb.Endpoint.broadcast_from(self(), @topic, "board_update", %{
+      board: board
+
+    })
+
     {
       :noreply,
       assign(
