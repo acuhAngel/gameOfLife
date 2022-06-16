@@ -61,7 +61,7 @@
       <%= for y <- 0..(Conway.Grid.size(@board) - 1) do %>
         <div class="row">
           <%= for x <- 0..(Conway.Grid.size(@board)- 1) do %>
-            <div class="">
+            <div>
               <%= case Conway.Grid.cell_status(@board, x, y) do %>
                 <% 0 -> %> <button class="no-live " phx-click="chg-status" phx-value-row={y} phx-value-col={x} value="0"> ☠️ </button>
                 <% 1 -> %> <button class="live " phx-click="chg-status" phx-value-row={y} phx-value-col={x} value="1"> 😁 </button>

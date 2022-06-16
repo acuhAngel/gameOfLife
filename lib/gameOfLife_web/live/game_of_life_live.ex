@@ -65,7 +65,7 @@ defmodule GameOfLifeWeb.GameOfLifeLive do
 
   def handle_event("dimension", %{"dimension" => dimension}, socket) do
     if socket.assigns.go == "stop" do
-      IO.inspect(dimension)
+      # IO.inspect(dimension)
       display = "Board size: #{dimension} x #{dimension}"
       {size, _} = Integer.parse(dimension)
       board = Grid.new(size, "0")
@@ -181,7 +181,6 @@ defmodule GameOfLifeWeb.GameOfLifeLive do
 
     GameOfLifeWeb.Endpoint.broadcast_from(self(), @topic, "board_update", %{
       board: board
-
     })
 
     {
