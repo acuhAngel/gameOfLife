@@ -77,7 +77,7 @@ defmodule Conway.Grid do
     |> list_to_data
   end
 
-  defp list_to_data(data) do
+  def list_to_data(data) do
     data
     |> Enum.map(&List.to_tuple/1)
     |> List.to_tuple()
@@ -92,7 +92,7 @@ defmodule Conway.Grid do
     end
   end
 
-  defp alive_neighbours(grid, cell_x, cell_y) do
+  def alive_neighbours(grid, cell_x, cell_y) do
     for x <- (cell_x - 1)..(cell_x + 1),
         y <- (cell_y - 1)..(cell_y + 1),
         x in 0..(size(grid) - 1) and
@@ -128,7 +128,7 @@ defmodule Conway.TerminalGame do
     grid
     |> print(name)
     |> Conway.Grid.next()
-    |> play(name, steps)
+    |> play(name, steps - 1)
   end
 
   def print(grid, name) do
